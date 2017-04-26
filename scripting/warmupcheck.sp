@@ -18,6 +18,19 @@ public Plugin myinfo =
     url         = "https://forums.alliedmods.net/showthread.php?t=296558" 
 }; 
 
+public void OnPluginStart()
+{
+	CreateTimer(30.0, Announce_Loneliness);
+}
+
+public Action Announce_Loneliness(Handle timer)
+{
+	if(!b_LimitReached)
+	{
+		PrintToChatAll("%s It appears you are lonely, you have plenty of time to use \x02!ws\x01.", TAG_MESSAGE);
+	}
+}
+
 public Action WarmupCheck() 
 { 
     if(!b_LimitReached) 
@@ -54,6 +67,7 @@ public void OnClientDisconnect()
     i_PlayerCount = i_PlayerCount - 1;
     if(i_PlayerCount <= 1)
     {
+    	b_LimitReached = false; 
     	ServerCommand("mp_warmuptime 999999");
     	ServerCommand("mp_restartgame 1");
     	PrintToChatAll("%s There is now only 1 player connected, initiating warmup period.", TAG_MESSAGE);
