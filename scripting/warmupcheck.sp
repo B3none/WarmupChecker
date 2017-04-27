@@ -97,7 +97,7 @@ Menu BuildWarmupMapSelect()
 
 public Action WarmupMapMenu(int client, int args)
 {
-	if(0 < client <= MaxClients && IsClientInGame(client))
+	if(IsValidClient(client))
 	{
 		if(b_CanWarmupMenu)
 		{
@@ -136,10 +136,9 @@ public Action WarmupCheck()
     { 
         if(i_PlayerCount == i_PlayersNeeded) 
         { 
-            ServerCommand("mp_warmuptime 0;"); 
-            ServerCommand("mp_restartgame 1;");
             PrintToChatAll("%s There are now \x0C%i\x01 players connected, initiating Retakes.", TAG_MESSAGE, i_PlayersNeeded);
-            b_LimitReached = true; 
+            b_LimitReached = true;
+            ResetGame();
         }
         
         /* Debugging else statement */
