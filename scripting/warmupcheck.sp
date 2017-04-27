@@ -41,7 +41,7 @@ public Plugin myinfo =
 
 public void OnPluginStart()
 {
-	CreateTimer(30.0, Announce_Loneliness, TIMER_REPEAT); // Every 30 seconds make an announcment
+	CreateTimer(30.0, Announce_Loneliness); // Every 30 seconds make an announcment
 	
 	LoadTranslations("warmupcheckermenu.phrases");
 	
@@ -49,6 +49,12 @@ public void OnPluginStart()
 	RegConsoleCmd("sm_warmupmap", WarmupMapMenu, "Select the map during warmup!");
 	RegConsoleCmd("sm_WM", WarmupMapMenu, "Select the map during warmup!");
 	
+	HookEvent("round_start", OnRoundStart);
+}
+
+public Action OnRoundStart(Handle event, const char []name, bool dontbroadcast)
+{
+	b_CanWarmupMenu = false;
 }
 
 public int WarmupMapHandler(Menu menu, MenuAction action, int client, int choice)
@@ -60,7 +66,9 @@ public int WarmupMapHandler(Menu menu, MenuAction action, int client, int choice
 			char info[32];
 			
 			if(StrEqual(map, DefaultValue))
+			{
 				GetCurrentMap(map, sizeof(map));
+			}
 				
 			menu.GetItem(choice, info, sizeof(info));
 			
@@ -72,7 +80,9 @@ public int WarmupMapHandler(Menu menu, MenuAction action, int client, int choice
 			int style;
 			
 			if(StrEqual(map, DefaultValue))
+			{
 				GetCurrentMap(map, sizeof(map));
+			}
 			
 			if(StrEqual(map, sMapList[choice]))
 			{
@@ -127,6 +137,7 @@ public Action Announce_Loneliness(Handle timer)
 	{
 		PrintToChatAll("%s It appears you are lonely, you have plenty of time to use \x02!ws\x01.", TAG_MESSAGE);
 		PrintToChatAll("%s You can also type \x02!wm\x01 to open the map selection menu.", TAG_MESSAGE);
+		CreateTimer(30.0, Announce_Loneliness);
 	}
 }
 
@@ -163,8 +174,17 @@ public Action WarmupCheck()
 
 public Action ResetGame() 
 {
-	ServerCommand("mp_warmuptime ", !b_LimitReached ? "0;":"7200;");
-	ServerCommand("mp_restartgame 1;");
+	if(b_LimitReached)
+	{
+		ServerCommand("mp_warmuptime 0;");
+		ServerCommand("mp_restartgame 1;");
+	}
+	
+	else
+	{
+		ServerCommand("mp_warmuptime 7200;");
+		ServerCommand("mp_restartgame 1;");
+	}
 } 
 
 public void OnClientPutInServer() 
