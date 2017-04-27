@@ -12,6 +12,7 @@
 #define TAG_MESSAGE "[\x04VoidRealityWarmup\x01]"
 
 Menu m_WarmupMapSelect;
+int i_CurrentWallet;
 int i_PlayerCount;
 int i_PlayersNeeded;
 bool b_LimitReached;
@@ -35,13 +36,14 @@ public Plugin myinfo =
     name        = "Warmup Checker", 
     author      = "B3none", 
     description = "Warmup until a defined number of players has been reached", 
-    version     = "1.0.1", 
+    version     = "1.0.2", 
     url         = "https://forums.alliedmods.net/showthread.php?t=296558" 
 }; 
 
 public void OnPluginStart()
 {
 	CreateTimer(30.0, Announce_Loneliness); // Every 30 seconds make an announcment
+	i_CurrentWallet = FindSendPropInfo("CCSPlayer", "m_iAccount");
 	
 	LoadTranslations("warmupcheckermenu.phrases");
 	
@@ -50,6 +52,27 @@ public void OnPluginStart()
 	RegConsoleCmd("sm_WM", WarmupMapMenu, "Select the map during warmup!");
 	
 	HookEvent("round_start", OnRoundStart);
+	HookEvent("player_spawn", OnPlayerSpawn);
+}
+
+public Action OnPlayerSpawn(Handle event, const char []name, bool dontbroadcast)
+{
+	int client = GetEventInt(event, "userid");
+	if(!b_LimitReached)
+	{
+		if (i_CurrentWallet != -1)
+		{
+			SetEntData(client, i_CurrentWallet, 16000);
+		}
+	}
+	
+	else
+	{
+		if (i_CurrentWallet != -1)
+		{
+			SetEntData(client, i_CurrentWallet, 0);
+		}
+	}
 }
 
 public Action OnRoundStart(Handle event, const char []name, bool dontbroadcast)
@@ -211,6 +234,7 @@ public void OnMapStart()
 	ResetGame();
 	i_PlayerCount = 0;
 	i_PlayersNeeded = 3;
+	i_CurrentWallet = -1;
 	b_LimitReached = false;
 	CreateTimer(15.0, CanUseWarmupMenu); //15 second delay to stop a player changing the map of a full server (before everyone joins.)
 	m_WarmupMapSelect = BuildWarmupMapSelect();
@@ -223,6 +247,7 @@ public void OnMapEnd()
 { 
     i_PlayerCount = 0;
     i_PlayersNeeded = 3;
+    i_CurrentWallet = -1;
     b_LimitReached = false;
     b_CanWarmupMenu = false;
     DefaultValue = "Psst, I'm a default value!";
