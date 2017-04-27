@@ -16,6 +16,8 @@ int i_PlayerCount;
 int i_PlayersNeeded;
 bool b_LimitReached;
 bool b_CanWarmupMenu;
+char DefaultValue[64];
+char map[32];
 
 static const char sMapList[][] =
 {
@@ -56,9 +58,10 @@ public int WarmupMapHandler(Menu menu, MenuAction action, int client, int choice
 		case MenuAction_Select:
 		{
 			char info[32];
-			char map[32];
 			
-			GetCurrentMap(map, sizeof(map));
+			if(StrEqual(map, DefaultValue))
+				GetCurrentMap(map, sizeof(map));
+				
 			menu.GetItem(choice, info, sizeof(info));
 			
 			ServerCommand("map %s;", sMapList[choice]);
@@ -67,9 +70,9 @@ public int WarmupMapHandler(Menu menu, MenuAction action, int client, int choice
 		case MenuAction_DrawItem:
 		{
 			int style;
-			char map[32];
 			
-			GetCurrentMap(map, sizeof(map));
+			if(StrEqual(map, DefaultValue))
+				GetCurrentMap(map, sizeof(map));
 			
 			if(StrEqual(map, sMapList[choice]))
 			{
@@ -160,16 +163,7 @@ public Action WarmupCheck()
 
 public Action ResetGame() 
 {
-	if(!b_LimitReached)
-	{
-		ServerCommand("mp_warmuptime 7200;"); // I could look at forcing the "m_bWarmupPeriod" offset to 1.
-	} 
-	
-	else
-	{
-		ServerCommand("mp_warmuptime 0;"); // I could look at forcing the "m_bWarmupPeriod" offset to 1.
-	}
-	
+	ServerCommand("mp_warmuptime ", !b_LimitReached ? "0;":"7200;");
 	ServerCommand("mp_restartgame 1;");
 } 
 
@@ -201,6 +195,8 @@ public void OnMapStart()
 	CreateTimer(15.0, CanUseWarmupMenu); //15 second delay to stop a player changing the map of a full server (before everyone joins.)
 	m_WarmupMapSelect = BuildWarmupMapSelect();
 	b_CanWarmupMenu = false;
+	DefaultValue = "Psst, I'm a default value!";
+	Format(map, sizeof(map), DefaultValue);
 } 
 
 public void OnMapEnd() 
@@ -209,6 +205,8 @@ public void OnMapEnd()
     i_PlayersNeeded = 3;
     b_LimitReached = false;
     b_CanWarmupMenu = false;
+    DefaultValue = "Psst, I'm a default value!";
+    Format(map, sizeof(map), DefaultValue);
     
     if(m_WarmupMapSelect != null)
     {
