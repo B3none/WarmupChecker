@@ -12,6 +12,7 @@
 #define TAG_MESSAGE "[\x04VoidRealityWarmup\x01]"
 
 Menu m_WarmupMapSelect;
+char map[32];
 int i_PlayerCount;
 int i_PlayersNeeded;
 bool b_LimitReached;
@@ -39,7 +40,8 @@ public Plugin myinfo =
 
 public void OnPluginStart()
 {
-	CreateTimer(30.0, Announce_Loneliness); // Every 30 seconds make an announcment
+	CreateTimer(30.0, Announce_Loneliness, TIMER_REPEAT); // Every 30 seconds make an announcment
+	GetCurrentMap(map, sizeof(map));
 	
 	LoadTranslations("warmupcheckermenu.phrases");
 	
@@ -64,9 +66,6 @@ public int WarmupMapHandler(Menu menu, MenuAction action, int client, int choice
 		case MenuAction_DrawItem:
 		{
 			int style;
-			char map[32];
-			GetCurrentMap(map, sizeof(map));
-			
 			if(StrEqual(map, sMapList[choice]))
 			{
 				return ITEMDRAW_DISABLED;
@@ -160,12 +159,10 @@ public Action WarmupCheck()
     } 
 } 
 
-public Action ResetMap() 
+public Action ResetGame() 
 {
-	char map[32];
-	GetCurrentMap(map, sizeof(map));
-	
-	ServerCommand("map %s;", map);
+	ServerCommand("mp_warmuptime ", b_LimitReached ? "0;":"7200;"); // I could look at forcing the "m_bWarmupPeriod" offset to 1.
+	ServerCommand("mp_restartgame 1;");
 } 
 
 public void OnClientPutInServer() 
@@ -181,28 +178,29 @@ public void OnClientDisconnect()
     if(i_PlayerCount <= 1)
     {
 		PrintToChatAll("%s There is now only 1 player connected, initiating warmup period.", TAG_MESSAGE);
-		PrintToChatAll("%s Resetting map in 5 seconds!.", TAG_MESSAGE);
-		ResetMap();
+		PrintToChatAll("%s Resetting the map!.", TAG_MESSAGE);
+		ResetGame();
     }
     // PrintToChatAll("%s One deducted from playercount! It is now \x0C%i\x01", TAG_MESSAGE, i_PlayerCount); // Debug
 } 
 
 public void OnMapStart() 
 {
-	ServerCommand("mp_warmuptime 7200;"); // I could look at forcing the "m_bWarmupPeriod" offset to 1.
-	ServerCommand("mp_restartgame 1;");
+	ResetGame();
 	i_PlayerCount = 0;
-	i_PlayersNeeded = 2;
+	i_PlayersNeeded = 3;
 	b_LimitReached = false;
 	CreateTimer(15.0, CanUseWarmupMenu); //15 second delay to stop a player changing the map of a full server (before everyone joins.)
 	m_WarmupMapSelect = BuildWarmupMapSelect();
+	b_CanWarmupMenu = false;
 } 
 
 public void OnMapEnd() 
 { 
     i_PlayerCount = 0;
-    i_PlayersNeeded = 2;
+    i_PlayersNeeded = 3;
     b_LimitReached = false;
+    b_CanWarmupMenu = false;
     
     if(m_WarmupMapSelect != null)
     {
