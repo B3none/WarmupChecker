@@ -198,12 +198,18 @@ public Action ResetGame()
 	if(b_LimitReached)
 	{
 		ServerCommand("mp_warmuptime 0;");
+		ServerCommand("mp_death_drop_defuser 1;");
+		ServerCommand("mp_death_drop_grenade 1;");
+		ServerCommand("mp_death_drop_gun 1;");
 		ServerCommand("mp_restartgame 1;");
 	}
 	
 	else
 	{
 		ServerCommand("mp_warmuptime 7200;");
+		ServerCommand("mp_death_drop_defuser 0;");
+		ServerCommand("mp_death_drop_grenade 0;");
+		ServerCommand("mp_death_drop_gun 0;");
 		ServerCommand("mp_restartgame 1;");
 	}
 } 
