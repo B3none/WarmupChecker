@@ -36,7 +36,7 @@ public Plugin myinfo =
     name        = "Warmup Checker", 
     author      = "B3none", 
     description = "Warmup until a defined number of players has been reached", 
-    version     = "1.0.2", 
+    version     = "1.0.1", 
     url         = "https://forums.alliedmods.net/showthread.php?t=296558" 
 }; 
 
@@ -52,10 +52,10 @@ public void OnPluginStart()
 	RegConsoleCmd("sm_WM", WarmupMapMenu, "Select the map during warmup!");
 	
 	HookEvent("round_start", OnRoundStart);
-	HookEvent("player_spawn", OnPlayerSpawn);
+	HookEvent("buymenu_open", OnBuyMenuOpen);
 }
 
-public Action OnPlayerSpawn(Handle event, const char []name, bool dontbroadcast)
+public Action OnBuyMenuOpen(Handle event, const char []name, bool dontbroadcast)
 {
 	int client = GetEventInt(event, "userid");
 	if(!b_LimitReached)
