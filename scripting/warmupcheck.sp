@@ -82,17 +82,17 @@ public int WarmupMapHandler(Menu menu, MenuAction action, int client, int choice
 
 Menu BuildWarmupMapSelect()
 {
-	Menu menu = new Menu(WarmupMapHandler, MENU_ACTIONS_ALL);
-	menu.SetTitle("%T", "Menu Title");
-	menu.AddItem("%T" ,"Dust 2");
-	menu.AddItem("%T" ,"Mirage");
-	menu.AddItem("%T" ,"Overpass");
-	menu.AddItem("%T" ,"Cobblestone");
-	menu.AddItem("%T" ,"Cache");
-	menu.AddItem("%T" ,"Train");
-	menu.AddItem("%T" ,"Inferno");
-	menu.ExitButton = true;
-	return menu;
+	Menu wmm = new Menu(WarmupMapHandler, MENU_ACTIONS_ALL);
+	wmm.SetTitle("%T", "Menu Title");
+	wmm.AddItem("%T" ,"Dust 2");
+	wmm.AddItem("%T" ,"Mirage");
+	wmm.AddItem("%T" ,"Overpass");
+	wmm.AddItem("%T" ,"Cobblestone");
+	wmm.AddItem("%T" ,"Cache");
+	wmm.AddItem("%T" ,"Train");
+	wmm.AddItem("%T" ,"Inferno");
+	wmm.ExitButton = true;
+	return wmm;
 }
 
 public Action WarmupMapMenu(int client, int args)
@@ -127,11 +127,6 @@ public Action CanUseWarmupMenu(Handle timer)
 	if(!b_LimitReached)
 	{
 		b_CanWarmupMenu = true;
-	}
-	
-	else
-	{
-		b_CanWarmupMenu = false;
 	}
 }
 
