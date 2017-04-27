@@ -237,7 +237,7 @@ public void OnMapStart()
 {
 	ResetGame();
 	i_PlayerCount = 0;
-	i_PlayersNeeded = 3;
+	i_PlayersNeeded = 2;
 	b_LimitReached = false;
 	CreateTimer(15.0, CanUseWarmupMenu); //15 second delay to stop a player changing the map of a full server (before everyone joins.)
 	m_WarmupMapSelect = BuildWarmupMapSelect();
@@ -249,7 +249,7 @@ public void OnMapStart()
 public void OnMapEnd() 
 { 
     i_PlayerCount = 0;
-    i_PlayersNeeded = 3;
+    i_PlayersNeeded = 2;
     b_LimitReached = false;
     b_CanWarmupMenu = false;
     DefaultValue = "Psst, I'm a default value!";
