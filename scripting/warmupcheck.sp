@@ -12,7 +12,6 @@
 #define TAG_MESSAGE "[\x04VoidRealityWarmup\x01]"
 
 Menu m_WarmupMapSelect;
-char map[32];
 int i_PlayerCount;
 int i_PlayersNeeded;
 bool b_LimitReached;
@@ -41,7 +40,6 @@ public Plugin myinfo =
 public void OnPluginStart()
 {
 	CreateTimer(30.0, Announce_Loneliness, TIMER_REPEAT); // Every 30 seconds make an announcment
-	GetCurrentMap(map, sizeof(map));
 	
 	LoadTranslations("warmupcheckermenu.phrases");
 	
@@ -58,6 +56,9 @@ public int WarmupMapHandler(Menu menu, MenuAction action, int client, int choice
 		case MenuAction_Select:
 		{
 			char info[32];
+			char map[32];
+			
+			GetCurrentMap(map, sizeof(map));
 			menu.GetItem(choice, info, sizeof(info));
 			
 			ServerCommand("map %s;", sMapList[choice]);
@@ -66,6 +67,10 @@ public int WarmupMapHandler(Menu menu, MenuAction action, int client, int choice
 		case MenuAction_DrawItem:
 		{
 			int style;
+			char map[32];
+			
+			GetCurrentMap(map, sizeof(map));
+			
 			if(StrEqual(map, sMapList[choice]))
 			{
 				return ITEMDRAW_DISABLED;
@@ -83,8 +88,8 @@ public int WarmupMapHandler(Menu menu, MenuAction action, int client, int choice
 Menu BuildWarmupMapSelect()
 {
 	Menu wmm = new Menu(WarmupMapHandler, MENU_ACTIONS_ALL);
-	wmm.SetTitle("%T", "Menu Title");
-	wmm.AddItem("%T" ,"Dust 2");
+	wmm.SetTitle("Warmup Map Menu\nSelect a map:");
+	wmm.AddItem("%T", "Dust 2");
 	wmm.AddItem("%T" ,"Mirage");
 	wmm.AddItem("%T" ,"Overpass");
 	wmm.AddItem("%T" ,"Cobblestone");
@@ -101,7 +106,7 @@ public Action WarmupMapMenu(int client, int args)
 	{
 		if(b_CanWarmupMenu)
 		{
-			m_WarmupMapSelect.Display(client, 20);
+			m_WarmupMapSelect.Display(client, 30);
 		}
 		return Plugin_Continue;
 	}
@@ -155,7 +160,16 @@ public Action WarmupCheck()
 
 public Action ResetGame() 
 {
-	ServerCommand("mp_warmuptime ", b_LimitReached ? "0;":"7200;"); // I could look at forcing the "m_bWarmupPeriod" offset to 1.
+	if(!b_LimitReached)
+	{
+		ServerCommand("mp_warmuptime 7200;"); // I could look at forcing the "m_bWarmupPeriod" offset to 1.
+	} 
+	
+	else
+	{
+		ServerCommand("mp_warmuptime 0;"); // I could look at forcing the "m_bWarmupPeriod" offset to 1.
+	}
+	
 	ServerCommand("mp_restartgame 1;");
 } 
 
