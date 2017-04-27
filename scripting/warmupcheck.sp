@@ -17,6 +17,17 @@ int i_PlayersNeeded;
 bool b_LimitReached;
 bool b_CanWarmupMenu;
 
+static const char sMapList[][] =
+{
+	"de_dust2",
+	"de_mirage",
+	"de_overpass",
+	"de_cbble",
+	"de_cache",
+	"de_train",
+	"de_inferno"
+}; 
+
 public Plugin myinfo =  
 { 
     name        = "Warmup Checker", 
@@ -32,9 +43,9 @@ public void OnPluginStart()
 	
 	LoadTranslations("warmupcheckermenu.phrases");
 	
-	RegConsoleCmd("sm_wm", WarmupMapMenu, "Select the map!");
-	RegConsoleCmd("sm_warmupmap", WarmupMapMenu, "Select the map!");
-	RegConsoleCmd("sm_WM", WarmupMapMenu, "Select the map!");
+	RegConsoleCmd("sm_wm", WarmupMapMenu, "Select the map during warmup!");
+	RegConsoleCmd("sm_warmupmap", WarmupMapMenu, "Select the map during warmup!");
+	RegConsoleCmd("sm_WM", WarmupMapMenu, "Select the map during warmup!");
 	
 }
 
@@ -45,42 +56,25 @@ public int WarmupMapHandler(Menu menu, MenuAction action, int client, int choice
 		case MenuAction_Select:
 		{
 			char info[32];
-			
 			menu.GetItem(choice, info, sizeof(info));
 			
-			if(choice == 0)
+			ServerCommand("map %s;", sMapList[choice]);
+		}
+		
+		case MenuAction_DrawItem:
+		{
+			int style;
+			char map[32];
+			GetCurrentMap(map, sizeof(map));
+			
+			if(StrEqual(map, sMapList[choice]))
 			{
-				ServerCommand("map de_dust2;");
+				return ITEMDRAW_DISABLED;
 			}
 			
-			else if(choice == 1)
+			else
 			{
-				ServerCommand("map de_mirage;");
-			}
-			
-			else if(choice == 2)
-			{
-				ServerCommand("map de_overpass;");
-			}
-			
-			else if(choice == 3)
-			{
-				ServerCommand("map de_cbble;");
-			}
-			
-			else if(choice == 4)
-			{
-				ServerCommand("map de_cache;");
-			}
-			
-			else if(choice == 5)
-			{
-				ServerCommand("map de_train;");
-			}
-			
-			else if(choice == 6)
-			{
-				ServerCommand("map de_inferno;");
+				return style;
 			}
 		}
 	}
@@ -166,7 +160,7 @@ public Action WarmupCheck()
     } 
 } 
 
-public Action ResetMap(Handle timer) 
+public Action ResetMap() 
 {
 	char map[32];
 	GetCurrentMap(map, sizeof(map));
@@ -188,7 +182,7 @@ public void OnClientDisconnect()
     {
 		PrintToChatAll("%s There is now only 1 player connected, initiating warmup period.", TAG_MESSAGE);
 		PrintToChatAll("%s Resetting map in 5 seconds!.", TAG_MESSAGE);
-		CreateTimer(5.0, ResetMap);
+		ResetMap();
     }
     // PrintToChatAll("%s One deducted from playercount! It is now \x0C%i\x01", TAG_MESSAGE, i_PlayerCount); // Debug
 } 
