@@ -146,15 +146,16 @@ public Action WarmupMapMenu(int client, int args)
 		if(b_CanWarmupMenu)
 		{
 			m_WarmupMapSelect.Display(client, 30);
+			return Plugin_Handled;
 		}
-		return Plugin_Continue;
-	}
 	
-	else
-	{
-		ReplyToCommand(client, "%s It is not the warmup, this command is only available if there is one person in the server.", TAG_MESSAGE);
-		return Plugin_Handled;
+		else
+		{
+			ReplyToCommand(client, "%s It is not the warmup, this command is only available if there is one person in the server.", TAG_MESSAGE);
+			return Plugin_Handled;
+		}
 	}
+	return Plugin_Continue;
 }
 
 public Action Announce_Loneliness(Handle timer)
