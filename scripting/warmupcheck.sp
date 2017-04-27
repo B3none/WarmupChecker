@@ -15,6 +15,8 @@ Menu m_WarmupMapSelect;
 int i_CurrentWallet;
 int i_PlayerCount;
 int i_PlayersNeeded;
+int i_RefillAmount = 16000;
+int i_ClearAmmo = 0;
 bool b_LimitReached;
 bool b_CanWarmupMenu;
 char DefaultValue[64];
@@ -43,7 +45,7 @@ public Plugin myinfo =
 public void OnPluginStart()
 {
 	CreateTimer(30.0, Announce_Loneliness); // Every 30 seconds make an announcment
-	i_CurrentWallet = FindSendPropInfo("CCSPlayer", "m_iAccount");
+	i_CurrentWallet = FindSendPropOffs("CCSPlayer", "m_iAccount");
 	
 	LoadTranslations("warmupcheckermenu.phrases");
 	
@@ -65,7 +67,7 @@ public Action SetClientMoney(Handle event, const char []name, bool dontbroadcast
 	{
 		if (i_CurrentWallet != -1)
 		{
-			SetEntData(client, i_CurrentWallet, 16000);
+			SetEntData(client, i_CurrentWallet, i_RefillAmount);
 		}
 	}
 	
@@ -73,7 +75,7 @@ public Action SetClientMoney(Handle event, const char []name, bool dontbroadcast
 	{
 		if (i_CurrentWallet != -1)
 		{
-			SetEntData(client, i_CurrentWallet, 0);
+			SetEntData(client, i_CurrentWallet, i_ClearAmmo);
 		}
 	}
 }
