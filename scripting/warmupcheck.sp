@@ -12,11 +12,10 @@
 #define TAG_MESSAGE "[\x04VoidRealityWarmup\x01]"
 
 Menu m_WarmupMapSelect;
-int i_CurrentWallet;
 int i_PlayerCount;
 int i_PlayersNeeded;
 int i_RefillAmount = 16000;
-int i_ClearAmmo = 0;
+int i_ClearMoney = 0;
 bool b_LimitReached;
 bool b_CanWarmupMenu;
 char DefaultValue[64];
@@ -45,7 +44,6 @@ public Plugin myinfo =
 public void OnPluginStart()
 {
 	CreateTimer(30.0, Announce_Loneliness); // Every 30 seconds make an announcment
-	i_CurrentWallet = FindSendPropOffs("CCSPlayer", "m_iAccount");
 	
 	LoadTranslations("warmupcheckermenu.phrases");
 	
@@ -65,18 +63,12 @@ public Action SetClientMoney(Handle event, const char []name, bool dontbroadcast
 	
 	if(!b_LimitReached)
 	{
-		if (i_CurrentWallet != -1)
-		{
-			SetEntData(client, i_CurrentWallet, i_RefillAmount);
-		}
+		SetEntProp(client, Prop_Send, "m_iAccount", i_RefillAmount);
 	}
 	
 	else
 	{
-		if (i_CurrentWallet != -1)
-		{
-			SetEntData(client, i_CurrentWallet, i_ClearAmmo);
-		}
+		SetEntProp(client, Prop_Send, "m_iAccount", i_ClearMoney);
 	}
 }
 
@@ -240,7 +232,6 @@ public void OnMapStart()
 	ResetGame();
 	i_PlayerCount = 0;
 	i_PlayersNeeded = 3;
-	i_CurrentWallet = -1;
 	b_LimitReached = false;
 	CreateTimer(15.0, CanUseWarmupMenu); //15 second delay to stop a player changing the map of a full server (before everyone joins.)
 	m_WarmupMapSelect = BuildWarmupMapSelect();
@@ -253,7 +244,6 @@ public void OnMapEnd()
 { 
     i_PlayerCount = 0;
     i_PlayersNeeded = 3;
-    i_CurrentWallet = -1;
     b_LimitReached = false;
     b_CanWarmupMenu = false;
     DefaultValue = "Psst, I'm a default value!";
@@ -268,13 +258,5 @@ public void OnMapEnd()
 
 stock bool IsValidClient(int client)
 {
-	if (client >= 1 && (client <= MaxClients) && IsValidEntity(client) && IsClientConnected(client) && IsClientInGame(client) && !IsFakeClient(client))
-	{
-		return true;
-	}
-	
-	else
-	{
-		return false;
-	}
-}
+    return (0 < client <= MaxClients && IsClientInGame(client));
+}  
