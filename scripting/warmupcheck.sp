@@ -57,7 +57,9 @@ public void OnPluginStart()
 
 public Action OnBuyMenuOpen(Handle event, const char []name, bool dontbroadcast)
 {
-	int client = GetEventInt(event, "userid");
+	int CUID = GetEventInt(event, "userid");
+	int client = GetClientOfUserId(CUID);
+	
 	if(!b_LimitReached)
 	{
 		if (i_CurrentWallet != -1)
