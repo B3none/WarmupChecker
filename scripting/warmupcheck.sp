@@ -52,10 +52,11 @@ public void OnPluginStart()
 	RegConsoleCmd("sm_WM", WarmupMapMenu, "Select the map during warmup!");
 	
 	HookEvent("round_start", OnRoundStart);
-	HookEvent("buymenu_open", OnBuyMenuOpen);
+	HookEvent("buymenu_open", SetClientMoney);
+	HookEvent("player_spawn", SetClientMoney);
 }
 
-public Action OnBuyMenuOpen(Handle event, const char []name, bool dontbroadcast)
+public Action SetClientMoney(Handle event, const char []name, bool dontbroadcast)
 {
 	int CUID = GetEventInt(event, "userid");
 	int client = GetClientOfUserId(CUID);
