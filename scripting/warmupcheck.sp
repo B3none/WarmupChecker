@@ -224,7 +224,7 @@ public void OnClientDisconnect()
     if(i_PlayerCount <= 1)
     {
 		PrintToChatAll("%s There is now only 1 player connected, initiating warmup period.", TAG_MESSAGE);
-		PrintToChatAll("%s Resetting the map!.", TAG_MESSAGE);
+		b_LimitReached = false;
 		ResetGame();
     }
     // PrintToChatAll("%s One deducted from playercount! It is now \x0C%i\x01", TAG_MESSAGE, i_PlayerCount); // Debug
@@ -260,4 +260,4 @@ public void OnMapEnd()
 stock bool IsValidClient(int client)
 {
     return (0 < client <= MaxClients && IsClientInGame(client));
-} 
+}
