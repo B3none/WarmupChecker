@@ -14,8 +14,6 @@
 Menu m_WarmupMapSelect;
 int i_PlayerCount;
 int i_PlayersNeeded = 2;
-int i_RefillAmount = 16000;
-int i_ClearMoney = 0;
 bool b_LimitReached;
 bool b_CanWarmupMenu;
 char DefaultValue[64];
@@ -52,23 +50,22 @@ public void OnPluginStart()
 	RegConsoleCmd("sm_WM", WarmupMapMenu, "Select the map during warmup!");
 	
 	HookEvent("round_start", OnRoundStart);
-	HookEvent("buymenu_open", SetClientMoney);
-	HookEvent("player_spawn", SetClientMoney);
+	
+	HookEvent("player_spawn", OnPlayerSpawn);
 }
 
-public Action SetClientMoney(Handle event, const char []name, bool dontbroadcast)
+public Action OnPlayerSpawn(Handle event, const char []name, bool dontbroadcast)
 {
-	int CUID = GetEventInt(event, "userid");
-	int client = GetClientOfUserId(CUID);
-	
 	if(!b_LimitReached)
 	{
-		SetEntProp(client, Prop_Send, "m_iAccount", i_RefillAmount);
-	}
-	
-	else
-	{
-		SetEntProp(client, Prop_Send, "m_iAccount", i_ClearMoney);
+		for(int i = 1; i <= MaxClients; i++)
+		{
+			if(IsValidClient(i))
+			{
+				SetEntProp(i, Prop_Send, "m_iAccount", 16000);
+			}
+		}
+		// This specific for loop is from splewis practicemode.sp @ https://goo.gl/VJunUm
 	}
 }
 
