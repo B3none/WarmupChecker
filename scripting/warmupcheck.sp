@@ -1,5 +1,6 @@
 #include <sourcemod>
 #include <sdktools>
+#include <sdkhooks>
 
 #pragma semicolon 1 
 #pragma newdecls required 
@@ -55,7 +56,6 @@ public void OnPluginStart()
 
 public Action OnPlayerSpawn(Handle event, const char []name, bool dontbroadcast)
 {
-	int client = GetEventInt(event, "userid");
 	if(!b_LimitReached)
 	{
 		for(int i = 1; i <= MaxClients; i++)
@@ -63,25 +63,25 @@ public Action OnPlayerSpawn(Handle event, const char []name, bool dontbroadcast)
 			if(IsValidClient(i))
 			{
 				SetEntProp(i, Prop_Send, "m_iAccount", 16000);
+				
+				GivePlayerItem(i, "weapon_hegrenade");
+				GivePlayerItem(i, "weapon_smokegrenade"); 
+				GivePlayerItem(i, "weapon_flashbang");
+				
+				if (GetClientTeam(i) == 2)
+				{
+					GivePlayerItem(i, "weapon_molotov");
+					GivePlayerItem(i, "weapon_ak47");
+				}
+				
+				else if (GetClientTeam(i) == 3)
+				{
+					GivePlayerItem(i, "weapon_incgrenade");
+					GivePlayerItem(i, "weapon_m4a1_silencer");
+				}
 			}
 		}
 		// This specific for loop is from splewis practicemode.sp @ https://goo.gl/VJunUm
-		
-		GivePlayerItem(client, "weapon_hegrenade");
-		GivePlayerItem(client, "weapon_smokegrenade"); 
-		GivePlayerItem(client, "weapon_flashbang");
-		
-		if (GetClientTeam(client) == 2)
-		{
-			GivePlayerItem(client, "weapon_molotov");
-			GivePlayerItem(client, "weapon_ak47");
-		}
-		
-		else if (GetClientTeam(client) == 3)
-		{
-			GivePlayerItem(client, "weapon_incgrenade");
-			GivePlayerItem(client, "weapon_m4a1_silencer");
-		}
 	}
 }
 
@@ -220,7 +220,97 @@ public Action ResetGame()
 		ServerCommand("mp_restartgame 1;");
 		CreateTimer(5.0, Restart2);
 	}
-} 
+}
+
+/* Section writted by maxximou5 link @ https://github.com/Maxximou5/csgo-deathmatch/blob/master/scripting/deathmatch.sp#L1778 */
+public Action Event_HegrenadeDetonate(Event event, const char[] name, bool dontBroadcast)
+{
+	int client = GetClientOfUserId(event.GetInt("userid"));
+
+	if (!b_LimitReached)
+	{
+		if (IsValidClient(client) && IsPlayerAlive(client))
+		{
+			GivePlayerItem(client, "weapon_hegrenade");
+		}
+	}
+
+	return Plugin_Continue;
+}
+
+public Action Event_SmokegrenadeDetonate(Event event, const char[] name, bool dontBroadcast)
+{
+	int client = GetClientOfUserId(event.GetInt("userid"));
+
+	if (!b_LimitReached)
+	{
+		if (IsValidClient(client) && IsPlayerAlive(client))
+		{
+			GivePlayerItem(client, "weapon_smokegrenade");
+		}
+	}
+
+	return Plugin_Continue;
+}
+
+public Action Event_FlashbangDetonate(Event event, const char[] name, bool dontBroadcast)
+{
+	int client = GetClientOfUserId(event.GetInt("userid"));
+
+	if (!b_LimitReached)
+	{
+		if (IsValidClient(client) && IsPlayerAlive(client))
+		{
+			GivePlayerItem(client, "weapon_flashbang");
+		}
+	}
+
+	return Plugin_Continue;
+}
+
+public Action Event_DecoyStarted(Event event, const char[] name, bool dontBroadcast)
+{
+	int client = GetClientOfUserId(event.GetInt("userid"));
+
+	if (!b_LimitReached)
+	{
+		if (IsValidClient(client) && IsPlayerAlive(client))
+		{
+			GivePlayerItem(client, "weapon_decoy");
+		}
+	}
+
+	return Plugin_Continue;
+}
+
+public Action Event_MolotovDetonate(Event event, const char[] name, bool dontBroadcast)
+{
+	int client = GetClientOfUserId(event.GetInt("userid"));
+
+	if (!b_LimitReached)
+	{
+		if (IsValidClient(client) && IsPlayerAlive(client))
+		{
+			GivePlayerItem(client, "weapon_molotov");
+		}
+	}
+
+	return Plugin_Continue;
+}
+
+public Action Event_InfernoStartburn(Event event, const char[] name, bool dontBroadcast)
+{
+	int client = GetClientOfUserId(event.GetInt("userid"));
+
+	if (!b_LimitReached)
+	{
+		if (IsValidClient(client) && IsPlayerAlive(client))
+			GivePlayerItem(client, "weapon_incgrenade");
+	}
+
+	return Plugin_Continue;
+}
+/* End of maximouu5's section */
 
 public Action Restart2(Handle timer)
 {
