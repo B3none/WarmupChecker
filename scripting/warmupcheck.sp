@@ -32,7 +32,7 @@ public Plugin myinfo =
     name        = "Warmup Checker", 
     author      = "B3none", 
     description = "Warmup until a defined number of players has been reached", 
-    version     = "1.0.2", 
+    version     = "1.0.4", 
     url         = "https://forums.alliedmods.net/showthread.php?t=296558" 
 }; 
 
@@ -52,6 +52,11 @@ public void OnPluginStart()
 	HookEvent("round_start", OnRoundStart);
 	
 	HookEvent("player_spawn", OnPlayerSpawn);
+	HookEvent("hegrenade_detonate", HE_Detonate);
+	HookEvent("smokegrenade_detonate", Smoke_Detonate);
+	HookEvent("flashbang_detonate", Flash_Detonate);
+	HookEvent("molotov_detonate", Molotov_Detonate);
+	HookEvent("inferno_startburn", Inferno_Detonate);
 }
 
 public Action OnPlayerSpawn(Handle event, const char []name, bool dontbroadcast)
@@ -87,7 +92,7 @@ public Action OnPlayerSpawn(Handle event, const char []name, bool dontbroadcast)
 
 public Action OnRoundStart(Handle event, const char []name, bool dontbroadcast)
 {
-	b_CanWarmupMenu = false;
+	WarmupCheck();
 }
 
 public int WarmupMapHandler(Menu menu, MenuAction action, int client, int choice)
@@ -191,6 +196,7 @@ public Action WarmupCheck()
         { 
             PrintToChatAll("%s There are now \x0C%i\x01 players connected, initiating Retakes.", TAG_MESSAGE, i_PlayersNeeded);
             b_LimitReached = true;
+            b_CanWarmupMenu = false;
             ResetGame();
         }
     } 
@@ -201,8 +207,12 @@ public Action ResetGame()
 	if(b_LimitReached)
 	{
 		ServerCommand("mp_warmuptime 0;");
+		
 		if(sm_gt_installed)
+		{
 			ServerCommand("sm_tails_enabled 0;");
+		}
+		
 		ServerCommand("mp_death_drop_defuser 1;");
 		ServerCommand("mp_death_drop_grenade 1;");
 		ServerCommand("mp_death_drop_gun 1;");
@@ -222,84 +232,64 @@ public Action ResetGame()
 	}
 }
 
-public Action Event_HegrenadeDetonate(Event event, const char[] name, bool dontBroadcast)
+public Action HE_Detonate(Event event, const char[] name, bool dontBroadcast)
 {
-	for(int i = 1; i <= MAXPLAYERS+1; i++)
+	int client = event.GetInt("userid");
+	if (!b_LimitReached)
 	{
-		if (!b_LimitReached)
+		if (IsValidClient(client))
 		{
-			if (IsValidClient(i))
-			{
-				GivePlayerItem(i, "weapon_hegrenade");
-			}
+			GivePlayerItem(client, "weapon_hegrenade");
 		}
 	}
-
-	return Plugin_Continue;
 }
 
-public Action Event_SmokegrenadeDetonate(Event event, const char[] name, bool dontBroadcast)
+public Action Smoke_Detonate(Event event, const char[] name, bool dontBroadcast)
 {
-	for(int i = 1; i <= MAXPLAYERS+1; i++)
+	int client = event.GetInt("userid");
+	if (!b_LimitReached)
 	{
-		if (!b_LimitReached)
+		if (IsValidClient(client))
 		{
-			if (IsValidClient(i))
-			{
-				GivePlayerItem(i, "weapon_smokegrenade");
-			}
+			GivePlayerItem(client, "weapon_smokegrenade");
 		}
 	}
-
-	return Plugin_Continue;
 }
 
-public Action Event_FlashbangDetonate(Event event, const char[] name, bool dontBroadcast)
+public Action Flash_Detonate(Event event, const char[] name, bool dontBroadcast)
 {
-	for(int i = 1; i <= MAXPLAYERS+1; i++)
+	int client = event.GetInt("userid");
+	if (!b_LimitReached)
 	{
-		if (!b_LimitReached)
+		if (IsValidClient(client))
 		{
-			if (IsValidClient(i))
-			{
-				GivePlayerItem(i, "weapon_flashbang");
-			}
+			GivePlayerItem(client, "weapon_flashbang");
 		}
 	}
-
-	return Plugin_Continue;
 }
 
-public Action Event_MolotovDetonate(Event event, const char[] name, bool dontBroadcast)
+public Action Molotov_Detonate(Event event, const char[] name, bool dontBroadcast)
 {
-	for(int i = 1; i <= MAXPLAYERS+1; i++)
+	int client = event.GetInt("userid");
+	if (!b_LimitReached)
 	{
-		if (!b_LimitReached)
+		if (IsValidClient(client))
 		{
-			if (IsValidClient(i))
-			{
-				GivePlayerItem(i, "weapon_molotov");
-			}
+			GivePlayerItem(client, "weapon_molotov");
 		}
 	}
-
-	return Plugin_Continue;
 }
 
-public Action Event_InfernoStartburn(Event event, const char[] name, bool dontBroadcast)
+public Action Inferno_Detonate(Event event, const char[] name, bool dontBroadcast)
 {
-	for(int i = 1; i <= MAXPLAYERS+1; i++)
+	int client = event.GetInt("userid");
+	if (!b_LimitReached)
 	{
-		if (!b_LimitReached)
+		if (IsValidClient(client))
 		{
-			if (IsValidClient(i))
-			{
-				GivePlayerItem(i, "weapon_incgrenade");
-			}
+			GivePlayerItem(client, "weapon_incgrenade");
 		}
 	}
-
-	return Plugin_Continue;
 }
 
 public Action Restart2(Handle timer)
