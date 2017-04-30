@@ -1,9 +1,3 @@
-/*
-*	TODO
-*	-> Add ConVar's
-*	-> Refine / condense code.
-*/
-
 #include <sourcemod>
 
 #pragma semicolon 1 
@@ -18,7 +12,7 @@ bool b_LimitReached;
 bool b_CanWarmupMenu;
 char DefaultValue[64];
 char map[32];
-ConVar sm_grenade_trails = null;
+ConVar sm_gt_installed = null;
 
 static const char sMapList[][] =
 {
@@ -45,7 +39,7 @@ public void OnPluginStart()
 	CreateTimer(30.0, Announce_Loneliness);
 	
 	LoadTranslations("warmupcheckermenu.phrases");
-	sm_grenade_trails = CreateConVar("sm_grenade_trails", "0", "Do you have the grenade trails plugin? | 1 = Yes, 2 = No");
+	sm_gt_installed = CreateConVar("sm_gt_installed", "0", "Do you have the grenade trails plugin? | 1 = Yes, 2 = No");
 	
 	AutoExecConfig(true, "b3none_warmupchecker");
 	
@@ -189,7 +183,7 @@ public Action ResetGame()
 	if(b_LimitReached)
 	{
 		ServerCommand("mp_warmuptime 0;");
-		if(sm_grenade_trails)
+		if(sm_gt_installed)
 			ServerCommand("sm_tails_enabled 0;");
 		ServerCommand("mp_death_drop_defuser 1;");
 		ServerCommand("mp_death_drop_grenade 1;");
@@ -200,7 +194,7 @@ public Action ResetGame()
 	else
 	{
 		ServerCommand("mp_warmuptime 7200;");
-		if(sm_grenade_trails)
+		if(sm_gt_installed)
 			ServerCommand("sm_tails_enabled 1;");
 		ServerCommand("mp_death_drop_defuser 0;");
 		ServerCommand("mp_death_drop_grenade 0;");
