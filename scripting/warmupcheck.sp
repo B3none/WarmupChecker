@@ -92,7 +92,7 @@ public Action OnPlayerSpawn(Handle event, const char []name, bool dontbroadcast)
 
 public Action OnRoundStart(Handle event, const char []name, bool dontbroadcast)
 {
-	WarmupCheck();
+	CheckPlayerCount();
 }
 
 public int WarmupMapHandler(Menu menu, MenuAction action, int client, int choice)
@@ -197,6 +197,20 @@ public Action WarmupCheck()
             PrintToChatAll("%s There are now \x0C%i\x01 players connected, initiating Retakes.", TAG_MESSAGE, i_PlayersNeeded);
             b_LimitReached = true;
             b_CanWarmupMenu = false;
+            ResetGame();
+        }
+    } 
+} 
+
+public Action CheckPlayerCount() 
+{ 
+    if(b_LimitReached) 
+    { 
+        if(i_PlayerCount <= 1) 
+        { 
+            PrintToChatAll("%s There is now \x0C%i\x01 player connected, initiating Warmup.", TAG_MESSAGE, i_PlayersNeeded);
+            b_LimitReached = false;
+            b_CanWarmupMenu = true;
             ResetGame();
         }
     } 
