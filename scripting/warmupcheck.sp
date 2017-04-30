@@ -18,6 +18,7 @@ bool b_LimitReached;
 bool b_CanWarmupMenu;
 char DefaultValue[64];
 char map[32];
+ConVar sm_grenade_trails = null;
 
 static const char sMapList[][] =
 {
@@ -41,9 +42,12 @@ public Plugin myinfo =
 
 public void OnPluginStart()
 {
-	CreateTimer(30.0, Announce_Loneliness); // Every 30 seconds make an announcment
+	CreateTimer(30.0, Announce_Loneliness);
 	
 	LoadTranslations("warmupcheckermenu.phrases");
+	sm_grenade_trails = CreateConVar("sm_grenade_trails", "0", "Do you have the grenade trails plugin? | 1 = Yes, 2 = No");
+	
+	AutoExecConfig(true, "b3none_warmupchecker");
 	
 	RegConsoleCmd("sm_wm", WarmupMapMenu, "Select the map during warmup!");
 	RegConsoleCmd("sm_warmupmap", WarmupMapMenu, "Select the map during warmup!");
@@ -177,16 +181,6 @@ public Action WarmupCheck()
             b_LimitReached = true;
             ResetGame();
         }
-        
-        /* Debugging else statement */
-        /*
-        else
-        {
-            PrintToChatAll("%s Warmup check performed!", TAG_MESSAGE);
-            PrintToChatAll("%s b_LimitReached = ", b_LimitReached ? "True":"False", TAG_MESSAGE);
-            PrintToChatAll("%s MaxClients = \x0C%i\x01", TAG_MESSAGE, i_PlayersNeeded);
-        }
-        */
     } 
 } 
 
@@ -195,6 +189,8 @@ public Action ResetGame()
 	if(b_LimitReached)
 	{
 		ServerCommand("mp_warmuptime 0;");
+		if(sm_grenade_trails)
+			ServerCommand("sm_tails_enabled 0;");
 		ServerCommand("mp_death_drop_defuser 1;");
 		ServerCommand("mp_death_drop_grenade 1;");
 		ServerCommand("mp_death_drop_gun 1;");
@@ -204,15 +200,13 @@ public Action ResetGame()
 	else
 	{
 		ServerCommand("mp_warmuptime 7200;");
+		if(sm_grenade_trails)
+			ServerCommand("sm_tails_enabled 1;");
 		ServerCommand("mp_death_drop_defuser 0;");
 		ServerCommand("mp_death_drop_grenade 0;");
 		ServerCommand("mp_death_drop_gun 0;");
 		ServerCommand("mp_restartgame 1;");
 		CreateTimer(5.0, Restart2);
-		/*
-		*	The plugin is not catching certain servers so I have decided to
-		*	set the plugin to restart in 5 seconds time.
-		*/
 	}
 } 
 
@@ -224,7 +218,6 @@ public Action Restart2(Handle timer)
 public void OnClientPutInServer() 
 { 
     i_PlayerCount++;
-    // PrintToChatAll("%s Playercount incrimented! It is now \x0C%i\x01", TAG_MESSAGE, i_PlayerCount); // Debug
     WarmupCheck(); 
 } 
 
@@ -237,7 +230,6 @@ public void OnClientDisconnect()
 		b_LimitReached = false;
 		ResetGame();
     }
-    // PrintToChatAll("%s One deducted from playercount! It is now \x0C%i\x01", TAG_MESSAGE, i_PlayerCount); // Debug
 } 
 
 public void OnMapStart() 
@@ -245,7 +237,7 @@ public void OnMapStart()
 	ResetGame();
 	i_PlayerCount = 0;
 	b_LimitReached = false;
-	CreateTimer(15.0, CanUseWarmupMenu); //15 second delay to stop a player changing the map of a full server (before everyone joins.)
+	CreateTimer(15.0, CanUseWarmupMenu);
 	m_WarmupMapSelect = BuildWarmupMapSelect();
 	b_CanWarmupMenu = false;
 	DefaultValue = "Psst, I'm a default value!";
