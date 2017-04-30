@@ -1,4 +1,5 @@
 #include <sourcemod>
+#include <sdktools>
 
 #pragma semicolon 1 
 #pragma newdecls required 
@@ -54,6 +55,7 @@ public void OnPluginStart()
 
 public Action OnPlayerSpawn(Handle event, const char []name, bool dontbroadcast)
 {
+	int client = GetEventInt(event, "userid");
 	if(!b_LimitReached)
 	{
 		for(int i = 1; i <= MaxClients; i++)
@@ -64,6 +66,22 @@ public Action OnPlayerSpawn(Handle event, const char []name, bool dontbroadcast)
 			}
 		}
 		// This specific for loop is from splewis practicemode.sp @ https://goo.gl/VJunUm
+		
+		GivePlayerItem(client, "weapon_hegrenade");
+		GivePlayerItem(client, "weapon_smokegrenade"); 
+		GivePlayerItem(client, "weapon_flashbang");
+		
+		if (GetClientTeam(client) == 2)
+		{
+			GivePlayerItem(client, "weapon_molotov");
+			GivePlayerItem(client, "weapon_ak47");
+		}
+		
+		else if (GetClientTeam(client) == 3)
+		{
+			GivePlayerItem(client, "weapon_incgrenade");
+			GivePlayerItem(client, "weapon_m4a1_silencer");
+		}
 	}
 }
 
