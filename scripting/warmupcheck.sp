@@ -35,7 +35,7 @@ public Plugin myinfo =
     name        = "Warmup Checker", 
     author      = "B3none", 
     description = "Warmup until a defined number of players has been reached", 
-    version     = "1.0.1", 
+    version     = "1.0.2", 
     url         = "https://forums.alliedmods.net/showthread.php?t=296558" 
 }; 
 
@@ -208,8 +208,18 @@ public Action ResetGame()
 		ServerCommand("mp_death_drop_grenade 0;");
 		ServerCommand("mp_death_drop_gun 0;");
 		ServerCommand("mp_restartgame 1;");
+		CreateTimer(5.0, Restart2);
+		/*
+		*	The plugin is not catching certain servers so I have decided to
+		*	set the plugin to restart in 5 seconds time.
+		*/
 	}
 } 
+
+public Action Restart2(Handle timer)
+{
+	ServerCommand("mp_restartgame 1;");
+}
 
 public void OnClientPutInServer() 
 { 
