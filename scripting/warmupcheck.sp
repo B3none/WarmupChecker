@@ -192,7 +192,7 @@ public Action WarmupCheck()
 { 
     if(!b_LimitReached) 
     { 
-        if(i_PlayerCount == i_PlayersNeeded) 
+        if(i_PlayerCount >= i_PlayersNeeded) 
         { 
             PrintToChatAll("%s There are now \x0C%i\x01 players connected, initiating Retakes.", TAG_MESSAGE, i_PlayersNeeded);
             b_LimitReached = true;
