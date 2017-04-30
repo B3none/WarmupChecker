@@ -222,16 +222,16 @@ public Action ResetGame()
 	}
 }
 
-/* Section writted by maxximou5 link @ https://github.com/Maxximou5/csgo-deathmatch/blob/master/scripting/deathmatch.sp#L1778 */
 public Action Event_HegrenadeDetonate(Event event, const char[] name, bool dontBroadcast)
 {
-	int client = GetClientOfUserId(event.GetInt("userid"));
-
-	if (!b_LimitReached)
+	for(int i = 1; i <= MAXPLAYERS+1; i++)
 	{
-		if (IsValidClient(client) && IsPlayerAlive(client))
+		if (!b_LimitReached)
 		{
-			GivePlayerItem(client, "weapon_hegrenade");
+			if (IsValidClient(i))
+			{
+				GivePlayerItem(i, "weapon_hegrenade");
+			}
 		}
 	}
 
@@ -240,13 +240,14 @@ public Action Event_HegrenadeDetonate(Event event, const char[] name, bool dontB
 
 public Action Event_SmokegrenadeDetonate(Event event, const char[] name, bool dontBroadcast)
 {
-	int client = GetClientOfUserId(event.GetInt("userid"));
-
-	if (!b_LimitReached)
+	for(int i = 1; i <= MAXPLAYERS+1; i++)
 	{
-		if (IsValidClient(client) && IsPlayerAlive(client))
+		if (!b_LimitReached)
 		{
-			GivePlayerItem(client, "weapon_smokegrenade");
+			if (IsValidClient(i))
+			{
+				GivePlayerItem(i, "weapon_smokegrenade");
+			}
 		}
 	}
 
@@ -255,28 +256,14 @@ public Action Event_SmokegrenadeDetonate(Event event, const char[] name, bool do
 
 public Action Event_FlashbangDetonate(Event event, const char[] name, bool dontBroadcast)
 {
-	int client = GetClientOfUserId(event.GetInt("userid"));
-
-	if (!b_LimitReached)
+	for(int i = 1; i <= MAXPLAYERS+1; i++)
 	{
-		if (IsValidClient(client) && IsPlayerAlive(client))
+		if (!b_LimitReached)
 		{
-			GivePlayerItem(client, "weapon_flashbang");
-		}
-	}
-
-	return Plugin_Continue;
-}
-
-public Action Event_DecoyStarted(Event event, const char[] name, bool dontBroadcast)
-{
-	int client = GetClientOfUserId(event.GetInt("userid"));
-
-	if (!b_LimitReached)
-	{
-		if (IsValidClient(client) && IsPlayerAlive(client))
-		{
-			GivePlayerItem(client, "weapon_decoy");
+			if (IsValidClient(i))
+			{
+				GivePlayerItem(i, "weapon_flashbang");
+			}
 		}
 	}
 
@@ -285,13 +272,14 @@ public Action Event_DecoyStarted(Event event, const char[] name, bool dontBroadc
 
 public Action Event_MolotovDetonate(Event event, const char[] name, bool dontBroadcast)
 {
-	int client = GetClientOfUserId(event.GetInt("userid"));
-
-	if (!b_LimitReached)
+	for(int i = 1; i <= MAXPLAYERS+1; i++)
 	{
-		if (IsValidClient(client) && IsPlayerAlive(client))
+		if (!b_LimitReached)
 		{
-			GivePlayerItem(client, "weapon_molotov");
+			if (IsValidClient(i))
+			{
+				GivePlayerItem(i, "weapon_molotov");
+			}
 		}
 	}
 
@@ -300,17 +288,19 @@ public Action Event_MolotovDetonate(Event event, const char[] name, bool dontBro
 
 public Action Event_InfernoStartburn(Event event, const char[] name, bool dontBroadcast)
 {
-	int client = GetClientOfUserId(event.GetInt("userid"));
-
-	if (!b_LimitReached)
+	for(int i = 1; i <= MAXPLAYERS+1; i++)
 	{
-		if (IsValidClient(client) && IsPlayerAlive(client))
-			GivePlayerItem(client, "weapon_incgrenade");
+		if (!b_LimitReached)
+		{
+			if (IsValidClient(i))
+			{
+				GivePlayerItem(i, "weapon_incgrenade");
+			}
+		}
 	}
 
 	return Plugin_Continue;
 }
-/* End of maximouu5's section */
 
 public Action Restart2(Handle timer)
 {
