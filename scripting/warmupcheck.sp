@@ -234,7 +234,7 @@ public Action ResetGame()
 
 public Action HE_Detonate(Event event, const char[] name, bool dontBroadcast)
 {
-	int client = event.GetInt("userid");
+	int client = GetEventInt(event, "userid");
 	if (!b_LimitReached)
 	{
 		if (IsValidClient(client))
@@ -246,7 +246,7 @@ public Action HE_Detonate(Event event, const char[] name, bool dontBroadcast)
 
 public Action Smoke_Detonate(Event event, const char[] name, bool dontBroadcast)
 {
-	int client = event.GetInt("userid");
+	int client = GetEventInt(event, "userid");
 	if (!b_LimitReached)
 	{
 		if (IsValidClient(client))
@@ -258,7 +258,7 @@ public Action Smoke_Detonate(Event event, const char[] name, bool dontBroadcast)
 
 public Action Flash_Detonate(Event event, const char[] name, bool dontBroadcast)
 {
-	int client = event.GetInt("userid");
+	int client = GetEventInt(event, "userid");
 	if (!b_LimitReached)
 	{
 		if (IsValidClient(client))
@@ -270,7 +270,7 @@ public Action Flash_Detonate(Event event, const char[] name, bool dontBroadcast)
 
 public Action Molotov_Detonate(Event event, const char[] name, bool dontBroadcast)
 {
-	int client = event.GetInt("userid");
+	int client = GetEventInt(event, "userid");
 	if (!b_LimitReached)
 	{
 		if (IsValidClient(client))
@@ -282,7 +282,7 @@ public Action Molotov_Detonate(Event event, const char[] name, bool dontBroadcas
 
 public Action Inferno_Detonate(Event event, const char[] name, bool dontBroadcast)
 {
-	int client = event.GetInt("userid");
+	int client = GetEventInt(event, "userid");
 	if (!b_LimitReached)
 	{
 		if (IsValidClient(client))
