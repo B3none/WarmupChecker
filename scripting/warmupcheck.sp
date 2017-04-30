@@ -222,8 +222,12 @@ public Action ResetGame()
 	else
 	{
 		ServerCommand("mp_warmuptime 7200;");
+		
 		if(sm_gt_installed)
+		{
 			ServerCommand("sm_tails_enabled 1;");
+		}
+		
 		ServerCommand("mp_death_drop_defuser 0;");
 		ServerCommand("mp_death_drop_grenade 0;");
 		ServerCommand("mp_death_drop_gun 0;");
@@ -234,60 +238,70 @@ public Action ResetGame()
 
 public Action HE_Detonate(Event event, const char[] name, bool dontBroadcast)
 {
-	int client = GetEventInt(event, "userid");
-	if (!b_LimitReached)
+	for(int i = 1; i <= MAXPLAYERS+1; i++)
 	{
-		if (IsValidClient(client))
+		if (!b_LimitReached)
 		{
-			GivePlayerItem(client, "weapon_hegrenade");
+			if (IsValidClient(i))
+			{
+				GivePlayerItem(i, "weapon_hegrenade");
+			}
 		}
 	}
 }
 
 public Action Smoke_Detonate(Event event, const char[] name, bool dontBroadcast)
 {
-	int client = GetEventInt(event, "userid");
-	if (!b_LimitReached)
+	for(int i = 1; i <= MAXPLAYERS+1; i++)
 	{
-		if (IsValidClient(client))
+		if (!b_LimitReached)
 		{
-			GivePlayerItem(client, "weapon_smokegrenade");
+			if (IsValidClient(i))
+			{
+				GivePlayerItem(i, "weapon_smokegrenade");
+			}
 		}
 	}
 }
 
 public Action Flash_Detonate(Event event, const char[] name, bool dontBroadcast)
 {
-	int client = GetEventInt(event, "userid");
-	if (!b_LimitReached)
+	for(int i = 1; i <= MAXPLAYERS+1; i++)
 	{
-		if (IsValidClient(client))
+		if (!b_LimitReached)
 		{
-			GivePlayerItem(client, "weapon_flashbang");
+			if (IsValidClient(i))
+			{
+				GivePlayerItem(i, "weapon_flashbang");
+			}
 		}
 	}
 }
 
 public Action Molotov_Detonate(Event event, const char[] name, bool dontBroadcast)
 {
-	int client = GetEventInt(event, "userid");
-	if (!b_LimitReached)
+	for(int i = 1; i <= MAXPLAYERS+1; i++)
 	{
-		if (IsValidClient(client))
+		if (!b_LimitReached)
 		{
-			GivePlayerItem(client, "weapon_molotov");
+			if (IsValidClient(i))
+			{
+				GivePlayerItem(i, "weapon_molotov");
+			}
 		}
 	}
 }
 
 public Action Inferno_Detonate(Event event, const char[] name, bool dontBroadcast)
 {
-	int client = GetEventInt(event, "userid");
-	if (!b_LimitReached)
+	for(int i = 1; i <= MAXPLAYERS+1; i++)
 	{
-		if (IsValidClient(client))
+		if (!b_LimitReached)
 		{
-			GivePlayerItem(client, "weapon_incgrenade");
+			if (IsValidClient(i))
+			{
+				GivePlayerItem(i, "weapon_incgrenade");
+			}
 		}
 	}
 }
