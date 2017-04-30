@@ -300,7 +300,15 @@ public Action Molotov_Detonate(Event event, const char[] name, bool dontBroadcas
 		{
 			if (IsValidClient(i))
 			{
-				GivePlayerItem(i, "weapon_molotov");
+				if (GetClientTeam(i) == 2)
+				{
+					GivePlayerItem(i, "weapon_molotov");
+				}
+				
+				if (GetClientTeam(i) == 3)
+				{
+					GivePlayerItem(i, "weapon_incgrenade");
+				}
 			}
 		}
 	}
@@ -314,7 +322,15 @@ public Action Inferno_Detonate(Event event, const char[] name, bool dontBroadcas
 		{
 			if (IsValidClient(i))
 			{
-				GivePlayerItem(i, "weapon_incgrenade");
+				if (GetClientTeam(i) == 2)
+				{
+					GivePlayerItem(i, "weapon_molotov");
+				}
+				
+				if (GetClientTeam(i) == 3)
+				{
+					GivePlayerItem(i, "weapon_incgrenade");
+				}
 			}
 		}
 	}
