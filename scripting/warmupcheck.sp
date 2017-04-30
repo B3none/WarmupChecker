@@ -63,7 +63,7 @@ public Action OnPlayerSpawn(Handle event, const char []name, bool dontbroadcast)
 {
 	if(!b_LimitReached)
 	{
-		for(int i = 1; i <= MaxClients; i++)
+		for(int i = 1; i <= MAXPLAYERS+1; i++)
 		{
 			if(IsValidClient(i))
 			{
