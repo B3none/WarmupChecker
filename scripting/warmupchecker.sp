@@ -7,13 +7,16 @@
 
 #define MESSAGE_PREFIX "[\x02WarmupChecker\x01]"
 
-Menu m_WarmupMapSelect;
 int i_PlayerCount;
 int i_PlayersNeeded = 2;
+
 bool b_LimitReached;
 bool b_CanWarmupMenu;
+
 char DefaultValue[64];
 char map[32];
+
+Menu m_WarmupMapSelect;
 ConVar sm_gt_installed = null;
 
 static const char sMapList[][] =
@@ -32,7 +35,7 @@ public Plugin myinfo =
     name = "Warmup Checker", 
     author = "B3none", 
     description = "Warmup until a defined number of players has been reached", 
-    version = "1.0.4", 
+    version = "1.0.5", 
     url = "https://github.com/b3none" 
 }; 
 
@@ -40,10 +43,10 @@ public void OnPluginStart()
 {
 	CreateTimer(30.0, Announce_Loneliness);
 	
-	LoadTranslations("warmupcheckermenu.phrases");
-	sm_gt_installed = CreateConVar("sm_gt_installed", "0", "Do you have the grenade trails plugin? | 1 = Yes, 2 = No");
+	LoadTranslations("warmupchecker.phrases");
+	sm_gt_installed = CreateConVar("sm_warmupchecker_gt_installed", "0", "Do you have the grenade trails plugin? | 1 = Yes, 2 = No");
 	
-	AutoExecConfig(true, "b3none_warmupchecker");
+	AutoExecConfig(true, "warmupchecker");
 	
 	RegConsoleCmd("sm_wm", WarmupMapMenu, "Select the map during warmup!");
 	RegConsoleCmd("sm_warmupmap", WarmupMapMenu, "Select the map during warmup!");
@@ -66,7 +69,7 @@ public Action OnPlayerSpawn(Handle event, const char []name, bool dontbroadcast)
 		return;
 	}
 	
-	for(int i = 1; i <= MAXPLAYERS+1; i++)
+	for(int i = 1; i <= MaxClients; i++)
 	{
 		if(!IsValidClient(i))
 		{
@@ -154,17 +157,19 @@ Menu BuildWarmupMapSelect()
 
 public Action WarmupMapMenu(int client, int args)
 {
-	if(IsValidClient(client))
+	if(!IsValidClient(client))
 	{
-		if(b_CanWarmupMenu)
-		{
-			m_WarmupMapSelect.Display(client, 30);
-			
-			return;
-		}
-		
-		PrintToChat(client, "%s It is not the warmup, this command is only available if there is less than %i people in the server.", MESSAGE_PREFIX, i_PlayersNeeded);
+		return;
 	}
+	
+	if(b_CanWarmupMenu)
+	{
+		m_WarmupMapSelect.Display(client, 30);
+		
+		return;
+	}
+	
+	PrintToChat(client, "%s It is not the warmup, this command is only available if there is less than %i people in the server.", MESSAGE_PREFIX, i_PlayersNeeded);
 }
 
 public Action Announce_Loneliness(Handle timer)
@@ -178,24 +183,23 @@ public Action Announce_Loneliness(Handle timer)
 
 public Action CanUseWarmupMenu(Handle timer)
 {
-	if(!b_LimitReached)
-	{
-		b_CanWarmupMenu = true;
-	}
+	b_CanWarmupMenu = !b_LimitReached;
 }
 
 public Action WarmupCheck() 
 { 
-    if(!b_LimitReached) 
+    if(b_LimitReached) 
     { 
-        if(i_PlayerCount >= i_PlayersNeeded) 
-        { 
-            PrintToChatAll("%s There are now \x0C%i\x01 players connected, initiating Retakes.", MESSAGE_PREFIX, i_PlayersNeeded);
-            b_LimitReached = true;
-            b_CanWarmupMenu = false;
-            ResetGame();
-        }
-    } 
+    	return;
+    }
+
+    if(i_PlayerCount >= i_PlayersNeeded) 
+    { 
+        PrintToChatAll("%s There are now \x0C%i\x01 players connected, initiating Retakes.", MESSAGE_PREFIX, i_PlayersNeeded);
+        b_LimitReached = true;
+        b_CanWarmupMenu = false;
+        ResetGame();
+    }
 } 
 
 public Action CheckPlayerCount() 
@@ -249,13 +253,13 @@ public Action ResetGame()
 
 public Action HE_Detonate(Event event, const char[] name, bool dontBroadcast)
 {
+	if (b_LimitReached)
+	{
+		return;	
+	}
+	
 	for(int i = 1; i <= MaxClients; i++)
 	{
-		if (b_LimitReached)
-		{
-			break;	
-		}
-		
 		if (IsValidClient(i))
 		{
 			GivePlayerItem(i, "weapon_hegrenade");
@@ -265,13 +269,13 @@ public Action HE_Detonate(Event event, const char[] name, bool dontBroadcast)
 
 public Action Smoke_Detonate(Event event, const char[] name, bool dontBroadcast)
 {
+	if (b_LimitReached)
+	{
+		return;	
+	}
+	
 	for(int i = 1; i <= MaxClients; i++)
 	{
-		if (b_LimitReached)
-		{
-			break;	
-		}
-		
 		if (IsValidClient(i))
 		{
 			GivePlayerItem(i, "weapon_smokegrenade");
@@ -281,13 +285,13 @@ public Action Smoke_Detonate(Event event, const char[] name, bool dontBroadcast)
 
 public Action Flash_Detonate(Event event, const char[] name, bool dontBroadcast)
 {
+	if (b_LimitReached)
+	{
+		return;	
+	}
+	
 	for(int i = 1; i <= MaxClients; i++)
 	{
-		if (b_LimitReached)
-		{
-			break;	
-		}
-		
 		if (IsValidClient(i))
 		{
 			GivePlayerItem(i, "weapon_flashbang");
@@ -297,21 +301,20 @@ public Action Flash_Detonate(Event event, const char[] name, bool dontBroadcast)
 
 public Action Molotov_Detonate(Event event, const char[] name, bool dontBroadcast)
 {
+	if (b_LimitReached)
+	{
+		return;	
+	}
+		
 	for(int i = 1; i <= MaxClients; i++)
 	{
-		if (b_LimitReached)
-		{
-			break;	
-		}
-		
 		if (IsValidClient(i) && IsPlayerAlive(i))
 		{
 			if (GetClientTeam(i) == CS_TEAM_T)
 			{
 				GivePlayerItem(i, "weapon_molotov");
 			}
-			
-			if (GetClientTeam(i) == CS_TEAM_CT)
+			else if (GetClientTeam(i) == CS_TEAM_CT)
 			{
 				GivePlayerItem(i, "weapon_incgrenade");
 			}
@@ -321,22 +324,25 @@ public Action Molotov_Detonate(Event event, const char[] name, bool dontBroadcas
 
 public Action Inferno_Detonate(Event event, const char[] name, bool dontBroadcast)
 {
-	for(int i = 1; i <= MAXPLAYERS+1; i++)
+	if (b_LimitReached)
 	{
-		if (!b_LimitReached)
+		return;
+	}
+	
+	for(int i = 1; i <= MaxClients; i++)
+	{
+		if (!IsValidClient(i))
 		{
-			if (IsValidClient(i))
-			{
-				if (GetClientTeam(i) == 2)
-				{
-					GivePlayerItem(i, "weapon_molotov");
-				}
-				
-				if (GetClientTeam(i) == 3)
-				{
-					GivePlayerItem(i, "weapon_incgrenade");
-				}
-			}
+			continue;
+		}
+		
+		if (GetClientTeam(i) == CS_TEAM_T)
+		{
+			GivePlayerItem(i, "weapon_molotov");
+		}
+		else if (GetClientTeam(i) == CS_TEAM_CT)
+		{
+			GivePlayerItem(i, "weapon_incgrenade");
 		}
 	}
 }
@@ -349,12 +355,14 @@ public Action Restart2(Handle timer)
 public void OnClientPutInServer() 
 { 
     i_PlayerCount++;
+    
     WarmupCheck(); 
 } 
 
 public void OnClientDisconnect() 
 { 
-    i_PlayerCount = i_PlayerCount - 1;
+    i_PlayerCount--;
+    
     if(i_PlayerCount <= 1)
     {
 		PrintToChatAll("%s There is now only 1 player connected, initiating warmup period.", MESSAGE_PREFIX);
@@ -377,20 +385,11 @@ public void OnMapStart()
 
 public void OnMapEnd() 
 { 
-    i_PlayerCount = 0;
-    b_LimitReached = false;
-    b_CanWarmupMenu = false;
-    DefaultValue = "Psst, I'm a default value!";
-    Format(map, sizeof(map), DefaultValue);
-    
-    if(m_WarmupMapSelect != null)
-    {
-        delete(m_WarmupMapSelect);
-        m_WarmupMapSelect = null;
-    }
+    delete m_WarmupMapSelect;
+    m_WarmupMapSelect = null;
 } 
 
 stock bool IsValidClient(int client)
 {
-    return (0 < client <= MaxClients && IsClientInGame(client));
+    return client > 0 && client <= MaxClients && IsClientInGame(client) && IsClientConnected(client) && IsClientAuthorized(client) && !IsFakeClient(client);
 }
