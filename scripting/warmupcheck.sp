@@ -1,11 +1,11 @@
 #include <sourcemod>
 #include <sdktools>
-#include <sdkhooks>
+#include <cstrike>
 
 #pragma semicolon 1 
 #pragma newdecls required 
 
-#define TAG_MESSAGE "[\x04VoidRealityWarmup\x01]"
+#define MESSAGE_PREFIX "[\x02WarmupChecker\x01]"
 
 Menu m_WarmupMapSelect;
 int i_PlayerCount;
@@ -29,11 +29,11 @@ static const char sMapList[][] =
 
 public Plugin myinfo =  
 { 
-    name        = "Warmup Checker", 
-    author      = "B3none", 
+    name = "Warmup Checker", 
+    author = "B3none", 
     description = "Warmup until a defined number of players has been reached", 
-    version     = "1.0.4", 
-    url         = "https://forums.alliedmods.net/showthread.php?t=296558" 
+    version = "1.0.4", 
+    url = "https://github.com/b3none" 
 }; 
 
 public void OnPluginStart()
@@ -61,32 +61,34 @@ public void OnPluginStart()
 
 public Action OnPlayerSpawn(Handle event, const char []name, bool dontbroadcast)
 {
-	if(!b_LimitReached)
+	if(b_LimitReached)
 	{
-		for(int i = 1; i <= MAXPLAYERS+1; i++)
+		return;
+	}
+	
+	for(int i = 1; i <= MAXPLAYERS+1; i++)
+	{
+		if(!IsValidClient(i))
 		{
-			if(IsValidClient(i))
-			{
-				SetEntProp(i, Prop_Send, "m_iAccount", 16000);
-				
-				GivePlayerItem(i, "weapon_hegrenade");
-				GivePlayerItem(i, "weapon_smokegrenade"); 
-				GivePlayerItem(i, "weapon_flashbang");
-				
-				if (GetClientTeam(i) == 2)
-				{
-					GivePlayerItem(i, "weapon_molotov");
-					GivePlayerItem(i, "weapon_ak47");
-				}
-				
-				else if (GetClientTeam(i) == 3)
-				{
-					GivePlayerItem(i, "weapon_incgrenade");
-					GivePlayerItem(i, "weapon_m4a1_silencer");
-				}
-			}
+			continue;
 		}
-		// This specific for loop is from splewis practicemode.sp @ https://goo.gl/VJunUm
+		
+		SetEntProp(i, Prop_Send, "m_iAccount", 16000);
+		
+		GivePlayerItem(i, "weapon_hegrenade");
+		GivePlayerItem(i, "weapon_smokegrenade"); 
+		GivePlayerItem(i, "weapon_flashbang");
+		
+		if (GetClientTeam(i) == CS_TEAM_T)
+		{
+			GivePlayerItem(i, "weapon_molotov");
+			GivePlayerItem(i, "weapon_ak47");
+		}
+		else if (GetClientTeam(i) == CS_TEAM_CT)
+		{
+			GivePlayerItem(i, "weapon_incgrenade");
+			GivePlayerItem(i, "weapon_m4a1_silencer");
+		}
 	}
 }
 
@@ -95,7 +97,7 @@ public Action OnRoundStart(Handle event, const char []name, bool dontbroadcast)
 	CheckPlayerCount();
 }
 
-public int WarmupMapHandler(Menu menu, MenuAction action, int client, int choice)
+stock int WarmupMapHandler(Menu menu, MenuAction action, int client, int choice)
 {
 	switch(action)
 	{
@@ -107,7 +109,7 @@ public int WarmupMapHandler(Menu menu, MenuAction action, int client, int choice
 			{
 				GetCurrentMap(map, sizeof(map));
 			}
-				
+			
 			menu.GetItem(choice, info, sizeof(info));
 			
 			ServerCommand("map %s;", sMapList[choice]);
@@ -126,11 +128,8 @@ public int WarmupMapHandler(Menu menu, MenuAction action, int client, int choice
 			{
 				return ITEMDRAW_DISABLED;
 			}
-			
-			else
-			{
-				return style;
-			}
+		
+			return style;
 		}
 	}
 	return 0;
@@ -139,6 +138,7 @@ public int WarmupMapHandler(Menu menu, MenuAction action, int client, int choice
 Menu BuildWarmupMapSelect()
 {
 	Menu wmm = new Menu(WarmupMapHandler, MENU_ACTIONS_ALL);
+	
 	wmm.SetTitle("Warmup Map Menu\nSelect a map:");
 	wmm.AddItem("%T", "Dust 2");
 	wmm.AddItem("%T" ,"Mirage");
@@ -148,6 +148,7 @@ Menu BuildWarmupMapSelect()
 	wmm.AddItem("%T" ,"Train");
 	wmm.AddItem("%T" ,"Inferno");
 	wmm.ExitButton = true;
+	
 	return wmm;
 }
 
@@ -158,24 +159,19 @@ public Action WarmupMapMenu(int client, int args)
 		if(b_CanWarmupMenu)
 		{
 			m_WarmupMapSelect.Display(client, 30);
-			// return Plugin_Handled;
+			
+			return;
 		}
-	
-		else
-		{
-			PrintToChat(client, "%s It is not the warmup, this command is only available if there is one person in the server.", TAG_MESSAGE);
-			// return Plugin_Handled;
-		}
+		
+		PrintToChat(client, "%s It is not the warmup, this command is only available if there is less than %i people in the server.", MESSAGE_PREFIX, i_PlayersNeeded);
 	}
-	// return Plugin_Continue;
 }
 
 public Action Announce_Loneliness(Handle timer)
 {
 	if(!b_LimitReached)
 	{
-		PrintToChatAll("%s It appears you are lonely, you have plenty of time to use \x02!ws\x01.", TAG_MESSAGE);
-		PrintToChatAll("%s You can also type \x02!wm\x01 to open the map selection menu.", TAG_MESSAGE);
+		PrintToChatAll("%s Type \x02!wm\x01 to open the map selection menu.", MESSAGE_PREFIX);
 		CreateTimer(30.0, Announce_Loneliness);
 	}
 }
@@ -194,7 +190,7 @@ public Action WarmupCheck()
     { 
         if(i_PlayerCount >= i_PlayersNeeded) 
         { 
-            PrintToChatAll("%s There are now \x0C%i\x01 players connected, initiating Retakes.", TAG_MESSAGE, i_PlayersNeeded);
+            PrintToChatAll("%s There are now \x0C%i\x01 players connected, initiating Retakes.", MESSAGE_PREFIX, i_PlayersNeeded);
             b_LimitReached = true;
             b_CanWarmupMenu = false;
             ResetGame();
@@ -204,16 +200,18 @@ public Action WarmupCheck()
 
 public Action CheckPlayerCount() 
 { 
-    if(b_LimitReached) 
+    if(!b_LimitReached) 
     { 
-        if(i_PlayerCount <= 1) 
-        { 
-            PrintToChatAll("%s There is now \x0C%i\x01 player connected, initiating Warmup.", TAG_MESSAGE, i_PlayersNeeded);
-            b_LimitReached = false;
-            b_CanWarmupMenu = true;
-            ResetGame();
-        }
-    } 
+    	return;
+    }
+    
+    if(i_PlayerCount <= 1) 
+    { 
+        PrintToChatAll("%s There is now \x0C%i\x01 player connected, initiating Warmup.", MESSAGE_PREFIX, i_PlayersNeeded);
+        b_LimitReached = false;
+        b_CanWarmupMenu = true;
+        ResetGame();
+    }
 } 
 
 public Action ResetGame() 
@@ -231,84 +229,91 @@ public Action ResetGame()
 		ServerCommand("mp_death_drop_grenade 1;");
 		ServerCommand("mp_death_drop_gun 1;");
 		ServerCommand("mp_restartgame 1;");
+		
+		return;
 	}
 	
-	else
+	ServerCommand("mp_warmuptime 7200;");
+	
+	if(sm_gt_installed)
 	{
-		ServerCommand("mp_warmuptime 7200;");
-		
-		if(sm_gt_installed)
-		{
-			ServerCommand("sm_tails_enabled 1;");
-		}
-		
-		ServerCommand("mp_death_drop_defuser 0;");
-		ServerCommand("mp_death_drop_grenade 0;");
-		ServerCommand("mp_death_drop_gun 0;");
-		ServerCommand("mp_restartgame 1;");
-		CreateTimer(5.0, Restart2);
+		ServerCommand("sm_tails_enabled 1;");
 	}
+	
+	ServerCommand("mp_death_drop_defuser 0;");
+	ServerCommand("mp_death_drop_grenade 0;");
+	ServerCommand("mp_death_drop_gun 0;");
+	ServerCommand("mp_restartgame 1;");
+	CreateTimer(5.0, Restart2);
 }
 
 public Action HE_Detonate(Event event, const char[] name, bool dontBroadcast)
 {
-	for(int i = 1; i <= MAXPLAYERS+1; i++)
+	for(int i = 1; i <= MaxClients; i++)
 	{
-		if (!b_LimitReached)
+		if (b_LimitReached)
 		{
-			if (IsValidClient(i))
-			{
-				GivePlayerItem(i, "weapon_hegrenade");
-			}
+			break;	
+		}
+		
+		if (IsValidClient(i))
+		{
+			GivePlayerItem(i, "weapon_hegrenade");
 		}
 	}
 }
 
 public Action Smoke_Detonate(Event event, const char[] name, bool dontBroadcast)
 {
-	for(int i = 1; i <= MAXPLAYERS+1; i++)
+	for(int i = 1; i <= MaxClients; i++)
 	{
-		if (!b_LimitReached)
+		if (b_LimitReached)
 		{
-			if (IsValidClient(i))
-			{
-				GivePlayerItem(i, "weapon_smokegrenade");
-			}
+			break;	
+		}
+		
+		if (IsValidClient(i))
+		{
+			GivePlayerItem(i, "weapon_smokegrenade");
 		}
 	}
 }
 
 public Action Flash_Detonate(Event event, const char[] name, bool dontBroadcast)
 {
-	for(int i = 1; i <= MAXPLAYERS+1; i++)
+	for(int i = 1; i <= MaxClients; i++)
 	{
-		if (!b_LimitReached)
+		if (b_LimitReached)
 		{
-			if (IsValidClient(i))
-			{
-				GivePlayerItem(i, "weapon_flashbang");
-			}
+			break;	
+		}
+		
+		if (IsValidClient(i))
+		{
+			GivePlayerItem(i, "weapon_flashbang");
 		}
 	}
 }
 
 public Action Molotov_Detonate(Event event, const char[] name, bool dontBroadcast)
 {
-	for(int i = 1; i <= MAXPLAYERS+1; i++)
+	for(int i = 1; i <= MaxClients; i++)
 	{
-		if (!b_LimitReached)
+		if (b_LimitReached)
 		{
-			if (IsValidClient(i))
+			break;	
+		}
+		
+		if (IsValidClient(i) && IsPlayerAlive(i))
+		{
+			if (GetClientTeam(i) == CS_TEAM_T)
 			{
-				if (GetClientTeam(i) == 2)
-				{
-					GivePlayerItem(i, "weapon_molotov");
-				}
-				
-				if (GetClientTeam(i) == 3)
-				{
-					GivePlayerItem(i, "weapon_incgrenade");
-				}
+				GivePlayerItem(i, "weapon_molotov");
+			}
+			
+			if (GetClientTeam(i) == CS_TEAM_CT)
+			{
+				GivePlayerItem(i, "weapon_incgrenade");
 			}
 		}
 	}
@@ -352,7 +357,7 @@ public void OnClientDisconnect()
     i_PlayerCount = i_PlayerCount - 1;
     if(i_PlayerCount <= 1)
     {
-		PrintToChatAll("%s There is now only 1 player connected, initiating warmup period.", TAG_MESSAGE);
+		PrintToChatAll("%s There is now only 1 player connected, initiating warmup period.", MESSAGE_PREFIX);
 		b_LimitReached = false;
 		ResetGame();
     }
